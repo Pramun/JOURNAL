@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Becoming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EFEEE9;
+    --bg-panel: #E7E4DC;
+    --ink: #23262B;
+    --ink-soft: #62656B;
+    --ink-faint: #9A9A93;
+    --line: #D7D3C8;
+    --moss: #5B6E5D;
+    --moss-soft: #DDE3DA;
+    --clay: #A9776B;
+    --clay-soft: #F0E1DB;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --radius: 3px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  ::selection{ background: var(--moss-soft); }
+  a{ color: inherit; }
+  button{ font-family: inherit; }
+
+  /* ---------- layout shell ---------- */
+  .shell{ max-width: 720px; margin: 0 auto; padding: 40px 24px 120px; }
+
+  header.top{
+    display:flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 34px; flex-wrap: wrap; gap: 10px;
+  }
+  .wordmark{
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .today-date{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  nav.tabs{
+    display:flex; gap: 4px; margin-bottom: 36px;
+    border-bottom: 1px solid var(--line);
+  }
+  nav.tabs button{
+    background:none; border:none; cursor:pointer;
+    padding: 10px 4px; margin-right: 22px;
+    font-size: 13px; letter-spacing: 0.03em;
+    color: var(--ink-faint);
+    border-bottom: 2px solid transparent;
+    transform: translateY(1px);
+    transition: color .15s ease, border-color .15s ease;
+  }
+  nav.tabs button.active{ color: var(--ink); border-color: var(--moss); }
+  nav.tabs button:hover{ color: var(--ink); }
+
+  .view{ display:none; }
+  .view.active{ display:block; animation: fade .25s ease; }
+  @keyframes fade{ from{ opacity:0; transform: translateY(3px);} to{opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ .view.active{ animation:none; } }
+
+  /* ---------- shared bits ---------- */
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 10px;
+  }
+  .section{ margin-bottom: 44px; }
+  .divider{ height:1px; background: var(--line); border:none; margin: 0 0 44px; }
+
+  .edit-btn{
+    background:none; border:none; cursor:pointer;
+    font-size: 11px; color: var(--ink-faint);
+    font-family: var(--font-mono);
+    padding: 2px 6px; border-radius: var(--radius);
+    transition: background .15s ease, color .15s ease;
+  }
+  .edit-btn:hover{ background: var(--bg-panel); color: var(--ink); }
+
+  /* currently grid */
+  .currently-grid{
+    display:grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+    gap: 20px 28px;
+  }
+  .currently-item h4{
+    margin: 0 0 6px; font-size: 12px; font-weight: 600;
+    color: var(--ink-soft); letter-spacing: 0.02em;
+  }
+  .currently-item p{ margin:0; font-family: var(--font-display); font-size: 17px; }
+
+  .focus-list{ list-style:none; margin:0; padding:0; }
+  .focus-list li{
+    display:flex; align-items:center; gap:10px;
+    padding: 8px 0; border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .focus-list li:last-child{ border-bottom:none; }
+  .focus-arrow{ color: var(--moss); font-family: var(--font-mono); }
+
+  /* today stat row */
+  .stat-row{
+    display:flex; flex-wrap:wrap; gap: 0;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    overflow:hidden;
+  }
+  .stat{
+    flex: 1 1 110px; padding: 14px 16px; border-right: 1px solid var(--line);
+  }
+  .stat:last-child{ border-right:none; }
+  .stat-label{ font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform:uppercase; letter-spacing:0.06em; }
+  .stat-value{ font-family: var(--font-display); font-size: 20px; margin-top:3px; }
+
+  .quiet-btn{
+    background: var(--ink); color: var(--bg);
+    border:none; border-radius: var(--radius);
+    padding: 9px 16px; font-size: 13px; cursor:pointer;
+    font-family: var(--font-body);
+  }
+  .quiet-btn:hover{ background: var(--moss); }
+  .ghost-btn{
+    background:none; border: 1px solid var(--line); color: var(--ink);
+    border-radius: var(--radius); padding: 8px 14px; font-size:13px; cursor:pointer;
+  }
+  .ghost-btn:hover{ border-color: var(--ink); }
+
+  .recent-list{ list-style:none; margin:0; padding:0; }
+  .recent-list li{
+    padding: 8px 0; border-bottom: 1px dashed var(--line);
+    font-size: 14px; display:flex; gap:10px;
+  }
+  .recent-list li:last-child{ border-bottom:none; }
+  .recent-list .arrow{ color: var(--ink-faint); }
+
+  .empty-note{
+    color: var(--ink-faint); font-size: 13px; font-style: italic;
+    padding: 6px 0;
+  }
+
+  /* ---------- calendar ---------- */
+  .cal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 20px; }
+  .cal-month-label{ font-family: var(--font-display); font-size: 19px; }
+  .cal-nav{ display:flex; gap: 6px; }
+  .cal-nav button{
+    background:none; border:1px solid var(--line); cursor:pointer;
+    width: 28px; height:28px; border-radius: var(--radius); color: var(--ink-soft);
+  }
+  .cal-nav button:hover{ border-color: var(--ink); color: var(--ink); }
+
+  .cal-grid{
+    display:grid; grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .cal-dow{
+    text-align:center; font-family: var(--font-mono); font-size: 10px;
+    color: var(--ink-faint); text-transform:uppercase; padding-bottom: 4px;
+  }
+  .cal-day{
+    aspect-ratio: 1; display:flex; align-items:center; justify-content:center;
+    position: relative; cursor:pointer; border-radius: 50%;
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft);
+    border: 1px solid transparent;
+  }
+  .cal-day.empty{ visibility:hidden; cursor:default; }
+  .cal-day .dot{
+    position:absolute; inset:2px; border-radius:50%;
+  }
+  .cal-day span{ position:relative; z-index:1; }
+  .cal-day[data-level="0"] .dot{ background: transparent; }
+  .cal-day[data-level="1"] .dot{ background: rgba(91,110,93,0.22); }
+  .cal-day[data-level="2"] .dot{ background: rgba(91,110,93,0.45); }
+  .cal-day[data-level="3"] .dot{ background: rgba(91,110,93,0.75); }
+  .cal-day[data-level="3"]{ color: var(--bg); }
+  .cal-day.is-today{ border-color: var(--clay); }
+  .cal-day:hover{ border-color: var(--ink-faint); }
+
+  .cal-legend{
+    display:flex; align-items:center; gap:8px; margin-top:20px;
+    font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint);
+  }
+  .legend-dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+
+  /* ---------- timeline (signature element: the thread) ---------- */
+  .thread{
+    position: relative; padding-left: 30px;
+  }
+  .thread::before{
+    content:''; position:absolute; left:5px; top:6px; bottom:6px; width:1px;
+    background: var(--line);
+  }
+  .thread-entry{
+    position: relative; padding-bottom: 30px; cursor:pointer;
+  }
+  .thread-entry:last-child{ padding-bottom: 0; }
+  .thread-node{
+    position:absolute; left: -30px; top: 4px;
+    width: 11px; height:11px; border-radius:50%;
+    background: var(--bg); border: 1px solid var(--ink-faint);
+  }
+  .thread-entry.is-recent .thread-node{
+    border-color: var(--moss); background: var(--moss);
+  }
+  .thread-date{
+    font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;
+  }
+  .thread-title{ font-family: var(--font-display); font-size: 17px; margin: 0 0 4px; }
+  .thread-desc{ font-size: 13px; color: var(--ink-soft); max-width: 480px; }
+  .thread-entry:hover .thread-title{ color: var(--moss); }
+
+  /* ---------- modal ---------- */
+  .overlay{
+    display:none; position:fixed; inset:0; background: rgba(35,38,43,0.4);
+    align-items:center; justify-content:center; padding: 20px; z-index: 50;
+  }
+  .overlay.active{ display:flex; }
+  .modal{
+    background: var(--bg); border-radius: 6px; padding: 26px;
+    width: 100%; max-width: 420px; max-height: 86vh; overflow-y:auto;
+    box-shadow: 0 20px 60px rgba(35,38,43,0.25);
+  }
+  .modal h3{ font-family: var(--font-display); font-size: 19px; margin: 0 0 18px; }
+  .field{ margin-bottom: 14px; }
+  .field label{
+    display:block; font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint);
+    margin-bottom: 5px;
+  }
+  .field input, .field textarea{
+    width:100%; border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 8px 10px; font-family: var(--font-body); font-size: 14px;
+    background: #fff; color: var(--ink);
+  }
+  .field input:focus, .field textarea:focus{ outline: 2px solid var(--moss); outline-offset: 1px; }
+  .field textarea{ resize: vertical; min-height: 60px; }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+  .modal-actions{ display:flex; justify-content:space-between; margin-top: 20px; gap: 8px; }
+  .modal-actions .left{ display:flex; gap:8px; }
+  .modal.wide{ max-width: 560px; }
+
+  /* ---------- entity cards (skills / studies / hobbies) ---------- */
+  .card-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; }
+  .entity-card{
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 16px; cursor:pointer; background: rgba(255,255,255,0.35);
+    transition: border-color .15s ease;
+  }
+  .entity-card:hover{ border-color: var(--moss); }
+  .entity-card h4{ font-family: var(--font-display); font-size: 16px; margin: 0 0 6px; }
+  .entity-card .card-sub{ font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; min-height: 15px; }
+  .status-dots{ display:flex; flex-wrap:wrap; gap: 5px; }
+  .status-dot{
+    font-family: var(--font-mono); font-size: 10px; padding: 2px 6px; border-radius: 10px;
+    background: var(--bg-panel); color: var(--ink-soft); white-space:nowrap;
+  }
+  .status-dot.s0{ opacity: 0.55; }
+  .status-dot.s2, .status-dot.s3, .status-dot.s4{ background: var(--moss-soft); color: var(--moss); }
+
+  .sub-eyebrow{
+    font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--ink-faint); margin: 18px 0 8px;
+  }
+  .dyn-row{ display:flex; gap: 8px; align-items:center; margin-bottom: 8px; }
+  .dyn-row input[type="text"]{
+    flex: 1; border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 7px 9px; font-size: 13px; font-family: var(--font-body); background:#fff; color: var(--ink);
+  }
+  .status-cycle{
+    background: var(--bg-panel); border: 1px solid var(--line); cursor:pointer;
+    font-family: var(--font-mono); font-size: 11px; padding: 6px 9px; border-radius: var(--radius);
+    color: var(--ink-soft); white-space: nowrap; min-width: 96px; text-align:center;
+  }
+  .status-cycle.s2, .status-cycle.s3, .status-cycle.s4{ background: var(--moss-soft); color: var(--moss); border-color: var(--moss-soft); }
+  .row-remove{
+    background:none; border:none; cursor:pointer; color: var(--ink-faint); font-size:15px; line-height:1;
+    padding: 4px 6px;
+  }
+  .row-remove:hover{ color: var(--clay); }
+  .dyn-add{
+    background:none; border: 1px dashed var(--line); cursor:pointer; width:100%;
+    padding: 7px; border-radius: var(--radius); font-size:12px; color: var(--ink-faint);
+    font-family: var(--font-mono); margin-top: 2px;
+  }
+  .dyn-add:hover{ border-color: var(--moss); color: var(--moss); }
+  .evidence-row{
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; margin-bottom: 8px;
+  }
+  .evidence-row input{ border:none; padding: 3px 0; font-size: 13px; width:100%; background:transparent; }
+  .evidence-row input:focus{ outline:none; }
+  .evidence-row .ev-title{ font-family: var(--font-body); font-weight:600; }
+  .evidence-row .ev-note{ font-family: var(--font-body); color: var(--ink-soft); font-size:12px; }
+  .log-row{ display:flex; gap:8px; align-items:baseline; margin-bottom:6px; font-size:13px; }
+  .log-row .log-date{ font-family: var(--font-mono); font-size:11px; color: var(--ink-faint); white-space:nowrap; }
+
+  /* ---------- thoughts / quotes / ideas / books ---------- */
+  .thought-row{
+    padding: 14px 0; border-bottom: 1px solid var(--line); cursor:pointer;
+  }
+  .thought-row:last-child{ border-bottom:none; }
+  .thought-row .thought-date{
+    font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px;
+  }
+  .thought-row p{ margin:0; font-size: 14px; }
+  .thought-row:hover p{ color: var(--moss); }
+
+  .quote-card{
+    border-left: 2px solid var(--moss); padding: 4px 0 4px 18px; margin-bottom: 20px; cursor:pointer;
+  }
+  .quote-card blockquote{
+    margin: 0 0 8px; font-family: var(--font-display); font-size: 18px; font-style: italic;
+    line-height: 1.4;
+  }
+  .quote-card .quote-author{ font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
+  .quote-card .quote-why{ font-size: 13px; color: var(--ink-soft); }
+  .quote-card:hover blockquote{ color: var(--moss); }
+
+  .idea-card{
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px;
+    margin-bottom: 12px; cursor:pointer;
+  }
+  .idea-card:hover{ border-color: var(--moss); }
+  .idea-card p{ margin: 0 0 8px; font-family: var(--font-display); font-size: 16px; }
+  .idea-status{
+    display:inline-block; font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 8px; border-radius: 10px; background: var(--bg-panel); color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .tag-pill{
+    display:inline-block; font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 7px; border-radius: 10px; background: var(--bg-panel); color: var(--ink-faint);
+    margin: 6px 6px 0 0;
+  }
+
+  .book-card{
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; cursor:pointer;
+  }
+  .book-card:hover{ border-color: var(--moss); }
+  .book-card h4{ font-family: var(--font-display); font-size: 16px; margin: 0 0 4px; }
+  .book-stars{ color: var(--clay); font-size: 13px; letter-spacing: 1px; margin-bottom: 6px; }
+  .book-card .card-sub{ margin-bottom: 8px; }
+
+  .star-picker{ display:flex; gap: 4px; margin-bottom: 4px; }
+  .star-picker span{ font-size: 22px; cursor:pointer; color: var(--line); line-height:1; }
+  .star-picker span.filled{ color: var(--clay); }
+
+  @media (max-width: 480px){
+    .shell{ padding: 28px 16px 100px; }
+    nav.tabs button{ margin-right: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top">
+    <div class="wordmark">Becoming</div>
+    <div class="today-date" id="todayLabel"></div>
+  </header>
+
+  <nav class="tabs">
+    <button data-view="dashboard" class="active">Dashboard</button>
+    <button data-view="calendar">Calendar</button>
+    <button data-view="timeline">Timeline</button>
+    <button data-view="skills">Skills</button>
+    <button data-view="studies">Studies</button>
+    <button data-view="hobbies">Hobbies</button>
+    <button data-view="thoughts">Thoughts</button>
+    <button data-view="books">Books</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="section">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <p class="eyebrow">Currently</p>
+        <button class="edit-btn" id="editCurrentlyBtn">edit</button>
+      </div>
+      <div class="currently-grid" id="currentlyGrid"></div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <p class="eyebrow">Current focus</p>
+        <button class="edit-btn" id="editFocusBtn">edit</button>
+      </div>
+      <ul class="focus-list" id="focusList"></ul>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <p class="eyebrow">Recent progress</p>
+        <button class="edit-btn" id="addProgressBtn">+ add</button>
+      </div>
+      <ul class="recent-list" id="progressList"></ul>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <p class="eyebrow">Today</p>
+        <button class="edit-btn" id="logTodayBtn">log today</button>
+      </div>
+      <div class="stat-row" id="todayStats"></div>
+    </div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="view" id="view-calendar">
+    <div class="cal-header">
+      <div class="cal-nav"><button id="calPrev">&larr;</button></div>
+      <div class="cal-month-label" id="calMonthLabel"></div>
+      <div class="cal-nav"><button id="calNext">&rarr;</button></div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-legend">
+      <span>less</span>
+      <span class="legend-dot" style="background:rgba(91,110,93,0.12)"></span>
+      <span class="legend-dot" style="background:rgba(91,110,93,0.22)"></span>
+      <span class="legend-dot" style="background:rgba(91,110,93,0.45)"></span>
+      <span class="legend-dot" style="background:rgba(91,110,93,0.75)"></span>
+      <span>more</span>
+      <span style="margin-left:12px;">— a mark simply means you were active that day.</span>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="view" id="view-timeline">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:24px;">
+      <p class="eyebrow" style="margin:0;">Meaningful moments</p>
+      <button class="ghost-btn" id="addEventBtn">+ new event</button>
+    </div>
+    <div class="thread" id="threadList"></div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="view" id="view-skills">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+      <p class="eyebrow" style="margin:0;">Skills</p>
+      <button class="ghost-btn" id="addSkillBtn">+ add skill</button>
+    </div>
+    <div class="card-grid" id="skillsGrid"></div>
+  </section>
+
+  <!-- STUDIES -->
+  <section class="view" id="view-studies">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+      <p class="eyebrow" style="margin:0;">Studies</p>
+      <button class="ghost-btn" id="addStudyBtn">+ add subject</button>
+    </div>
+    <div class="card-grid" id="studiesGrid"></div>
+  </section>
+
+  <!-- HOBBIES -->
+  <section class="view" id="view-hobbies">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+      <p class="eyebrow" style="margin:0;">Hobbies</p>
+      <button class="ghost-btn" id="addHobbyBtn">+ add hobby</button>
+    </div>
+    <div class="card-grid" id="hobbiesGrid"></div>
+  </section>
+
+  <!-- THOUGHTS -->
+  <section class="view" id="view-thoughts">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;">
+      <p class="eyebrow" style="margin:0;">My thoughts</p>
+      <button class="ghost-btn" id="addThoughtBtn">+ new thought</button>
+    </div>
+    <div id="thoughtsList"></div>
+
+    <hr class="divider" style="margin-top:32px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;">
+      <p class="eyebrow" style="margin:0;">Quotes I keep</p>
+      <button class="ghost-btn" id="addQuoteBtn">+ new quote</button>
+    </div>
+    <div id="quotesList"></div>
+
+    <hr class="divider" style="margin-top:32px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;">
+      <p class="eyebrow" style="margin:0;">Ideas I'm exploring</p>
+      <button class="ghost-btn" id="addIdeaBtn">+ new idea</button>
+    </div>
+    <div id="ideasList"></div>
+  </section>
+
+  <!-- BOOKS -->
+  <section class="view" id="view-books">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+      <p class="eyebrow" style="margin:0;">Reading archive</p>
+      <button class="ghost-btn" id="addBookBtn">+ add book</button>
+    </div>
+    <div class="card-grid" id="booksGrid"></div>
+  </section>
+</div>
+
+<!-- MODAL: day entry -->
+<div class="overlay" id="dayOverlay">
+  <div class="modal">
+    <h3 id="dayModalTitle">Log today</h3>
+    <div class="field-row">
+      <div class="field"><label>Study</label><input type="text" id="f-study" placeholder="e.g. 2h 30m"></div>
+      <div class="field"><label>Coding</label><input type="text" id="f-coding" placeholder="e.g. 1h"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Reading</label><input type="text" id="f-reading" placeholder="e.g. 35 pages"></div>
+      <div class="field"><label>Exercise</label><input type="text" id="f-exercise" placeholder="e.g. yes / 30m"></div>
+    </div>
+    <div class="field"><label>What happened today?</label><textarea id="f-notes" placeholder="Worked on..."></textarea></div>
+    <div class="modal-actions">
+      <div class="left">
+        <button class="ghost-btn" id="deleteDayBtn">delete</button>
+      </div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelDayBtn">cancel</button>
+        <button class="quiet-btn" id="saveDayBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: timeline event -->
+<div class="overlay" id="eventOverlay">
+  <div class="modal">
+    <h3>New moment</h3>
+    <div class="field"><label>Date</label><input type="date" id="ev-date"></div>
+    <div class="field"><label>Title</label><input type="text" id="ev-title" placeholder="Started learning Python"></div>
+    <div class="field"><label>Why it mattered</label><textarea id="ev-desc" placeholder="..."></textarea></div>
+    <div class="modal-actions">
+      <div class="left">
+        <button class="ghost-btn" id="deleteEventBtn" style="display:none;">delete</button>
+      </div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelEventBtn">cancel</button>
+        <button class="quiet-btn" id="saveEventBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: currently -->
+<div class="overlay" id="currentlyOverlay">
+  <div class="modal">
+    <h3>Edit currently</h3>
+    <div class="field"><label>Studies</label><input type="text" id="c-studies"></div>
+    <div class="field"><label>Skills</label><input type="text" id="c-skills"></div>
+    <div class="field"><label>Hobbies</label><input type="text" id="c-hobbies"></div>
+    <div class="field"><label>Exploring</label><input type="text" id="c-exploring"></div>
+    <div class="modal-actions">
+      <div class="left"></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelCurrentlyBtn">cancel</button>
+        <button class="quiet-btn" id="saveCurrentlyBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: focus -->
+<div class="overlay" id="focusOverlay">
+  <div class="modal">
+    <h3>Edit current focus</h3>
+    <div class="field"><label>One per line</label><textarea id="f-focus-list" style="min-height:110px;"></textarea></div>
+    <div class="modal-actions">
+      <div class="left"></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelFocusBtn">cancel</button>
+        <button class="quiet-btn" id="saveFocusBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: progress -->
+<div class="overlay" id="progressOverlay">
+  <div class="modal">
+    <h3>Add recent progress</h3>
+    <div class="field"><label>What happened</label><input type="text" id="p-text" placeholder="Finished the communication module"></div>
+    <div class="modal-actions">
+      <div class="left"></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelProgressBtn">cancel</button>
+        <button class="quiet-btn" id="saveProgressBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: skill -->
+<div class="overlay" id="skillOverlay">
+  <div class="modal wide">
+    <h3 id="skillModalTitle">New skill</h3>
+    <div class="field"><label>Name</label><input type="text" id="sk-name" placeholder="e.g. Communication"></div>
+    <div class="field"><label>Current focus</label><input type="text" id="sk-focus" placeholder="What are you working on right now?"></div>
+
+    <p class="sub-eyebrow">Topics</p>
+    <div id="skTopicsRows"></div>
+    <button class="dyn-add" id="skAddTopic">+ add topic</button>
+
+    <p class="sub-eyebrow">Resources</p>
+    <div class="field"><textarea id="sk-resources" placeholder="One per line — course, book, video..."></textarea></div>
+
+    <p class="sub-eyebrow">Projects / evidence</p>
+    <div id="skEvidenceRows"></div>
+    <button class="dyn-add" id="skAddEvidence">+ add evidence</button>
+
+    <p class="sub-eyebrow">Reflection</p>
+    <div class="field"><textarea id="sk-reflection" placeholder="What have you noticed about how you're doing at this?"></textarea></div>
+
+    <div class="modal-actions">
+      <div class="left"><button class="ghost-btn" id="deleteSkillBtn" style="display:none;">delete</button></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelSkillBtn">cancel</button>
+        <button class="quiet-btn" id="saveSkillBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: study -->
+<div class="overlay" id="studyOverlay">
+  <div class="modal wide">
+    <h3 id="studyModalTitle">New subject</h3>
+    <div class="field-row">
+      <div class="field"><label>Subject</label><input type="text" id="st-subject" placeholder="e.g. Database Systems"></div>
+      <div class="field"><label>Term</label><input type="text" id="st-term" placeholder="e.g. 2026, Semester 1"></div>
+    </div>
+    <div class="field"><label>What I'm learning</label><textarea id="st-learning" placeholder="..."></textarea></div>
+    <div class="field"><label>Topics completed (one per line)</label><textarea id="st-completed"></textarea></div>
+    <div class="field"><label>Currently studying (one per line)</label><textarea id="st-inprogress"></textarea></div>
+    <div class="field"><label>Notes</label><textarea id="st-notes" placeholder="What clicks, what doesn't..."></textarea></div>
+    <div class="modal-actions">
+      <div class="left"><button class="ghost-btn" id="deleteStudyBtn" style="display:none;">delete</button></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelStudyBtn">cancel</button>
+        <button class="quiet-btn" id="saveStudyBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: hobby -->
+<div class="overlay" id="hobbyOverlay">
+  <div class="modal wide">
+    <h3 id="hobbyModalTitle">New hobby</h3>
+    <div class="field-row">
+      <div class="field"><label>Name</label><input type="text" id="hb-name" placeholder="e.g. Chess"></div>
+      <div class="field"><label>Started</label><input type="text" id="hb-started" placeholder="e.g. 2024"></div>
+    </div>
+    <div class="field"><label>What I'm doing now (one per line)</label><textarea id="hb-focus"></textarea></div>
+    <div class="field"><label>What I want to accomplish (one per line)</label><textarea id="hb-goals"></textarea></div>
+
+    <p class="sub-eyebrow">Recent practice</p>
+    <div id="hbLogRows"></div>
+    <div class="dyn-row">
+      <input type="date" id="hb-log-date" style="flex:0 0 140px;">
+      <input type="text" id="hb-log-text" placeholder="What did you do?">
+      <button class="ghost-btn" id="hbAddLog" type="button">add</button>
+    </div>
+
+    <div class="field" style="margin-top:14px;"><label>Notes</label><textarea id="hb-notes"></textarea></div>
+    <div class="modal-actions">
+      <div class="left"><button class="ghost-btn" id="deleteHobbyBtn" style="display:none;">delete</button></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelHobbyBtn">cancel</button>
+        <button class="quiet-btn" id="saveHobbyBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: thought -->
+<div class="overlay" id="thoughtOverlay">
+  <div class="modal">
+    <h3>New thought</h3>
+    <div class="field"><label>Date</label><input type="date" id="th-date"></div>
+    <div class="field"><label>What's on your mind</label><textarea id="th-text" style="min-height:110px;" placeholder="I don't think progress should always be measured by..."></textarea></div>
+    <div class="modal-actions">
+      <div class="left"><button class="ghost-btn" id="deleteThoughtBtn" style="display:none;">delete</button></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelThoughtBtn">cancel</button>
+        <button class="quiet-btn" id="saveThoughtBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: quote -->
+<div class="overlay" id="quoteOverlay">
+  <div class="modal">
+    <h3>New quote</h3>
+    <div class="field"><label>Quote</label><textarea id="qt-text" placeholder="..."></textarea></div>
+    <div class="field"><label>Author</label><input type="text" id="qt-author" placeholder="e.g. Marcus Aurelius"></div>
+    <div class="field"><label>Why I saved it</label><textarea id="qt-why"></textarea></div>
+    <div class="field"><label>Related ideas (comma separated)</label><input type="text" id="qt-tags" placeholder="Philosophy, Discipline"></div>
+    <div class="modal-actions">
+      <div class="left"><button class="ghost-btn" id="deleteQuoteBtn" style="display:none;">delete</button></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelQuoteBtn">cancel</button>
+        <button class="quiet-btn" id="saveQuoteBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: idea -->
+<div class="overlay" id="ideaOverlay">
+  <div class="modal">
+    <h3>New idea</h3>
+    <div class="field"><label>Idea</label><textarea id="id-text" placeholder="Does knowledge actually make someone wiser, or..."></textarea></div>
+    <div class="field"><label>Status</label><input type="text" id="id-status" placeholder="Exploring" value="Exploring"></div>
+    <div class="field"><label>Related (comma separated)</label><input type="text" id="id-tags" placeholder="Philosophy, Psychology"></div>
+    <div class="modal-actions">
+      <div class="left"><button class="ghost-btn" id="deleteIdeaBtn" style="display:none;">delete</button></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelIdeaBtn">cancel</button>
+        <button class="quiet-btn" id="saveIdeaBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: book -->
+<div class="overlay" id="bookOverlay">
+  <div class="modal wide">
+    <h3 id="bookModalTitle">New book</h3>
+    <div class="field"><label>Title</label><input type="text" id="bk-title" placeholder="e.g. The Alchemist"></div>
+    <div class="field-row">
+      <div class="field"><label>Started</label><input type="text" id="bk-started" placeholder="e.g. June 2026"></div>
+      <div class="field"><label>Finished</label><input type="text" id="bk-finished" placeholder="e.g. July 2026"></div>
+    </div>
+    <div class="field">
+      <label>Rating</label>
+      <div class="star-picker" id="bk-star-picker">
+        <span data-val="1">&#9733;</span><span data-val="2">&#9733;</span><span data-val="3">&#9733;</span><span data-val="4">&#9733;</span><span data-val="5">&#9733;</span>
+      </div>
+    </div>
+    <div class="field"><label>What I learned</label><textarea id="bk-learned"></textarea></div>
+    <div class="field"><label>Ideas that stayed with me</label><textarea id="bk-stayed"></textarea></div>
+    <div class="field"><label>What changed in my thinking</label><textarea id="bk-changed"></textarea></div>
+    <div class="field"><label>Quotes worth remembering</label><textarea id="bk-quotes"></textarea></div>
+    <div class="field"><label>Related ideas (comma separated)</label><input type="text" id="bk-tags" placeholder="Purpose, Journey"></div>
+    <div class="modal-actions">
+      <div class="left"><button class="ghost-btn" id="deleteBookBtn" style="display:none;">delete</button></div>
+      <div class="left">
+        <button class="ghost-btn" id="cancelBookBtn">cancel</button>
+        <button class="quiet-btn" id="saveBookBtn">save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const DOW = ["S","M","T","W","T","F","S"];
+
+  function todayStr(){
+    const d = new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+String(d.getDate()).padStart(2,'0');
+  }
+  const TODAY = todayStr();
+
+  let profile = {
+    studies: "Computer Science / IT",
+    skills: "Programming · Communication · AI",
+    hobbies: "Reading · Chess · Drawing",
+    exploring: "Philosophy · Technology · Creativity",
+    focus: ["Learning Python", "Improving communication", "Learning video editing"],
+    progress: []
+  };
+  let entries = {};   // date -> {study, coding, reading, exercise, notes}
+  let events = [];    // {id, date, title, desc}
+  let skills = [];    // {id, name, focus, topics:[{text,status}], resources, evidence:[{title,note}], reflection}
+  let studies = [];   // {id, subject, term, learning, completed:[], inProgress:[], notes}
+  let hobbies = [];   // {id, name, started, focus:[], goals:[], log:[{date,text}], notes}
+  let myThoughts = []; // {id, date, text}
+  let quotes = [];    // {id, text, author, why, tags:[]}
+  let ideas = [];     // {id, text, status, tags:[]}
+  let books = [];     // {id, title, started, finished, rating, learned, stayed, changed, quotesText, tags:[]}
+
+  const STATUS_LABELS = ['Not started','Learning','Practicing','Comfortable','Strong'];
+
+  let calCursor = new Date();
+  let editingDate = null;
+  let editingEventId = null;
+  let editingSkillId = null;
+  let editingStudyId = null;
+  let editingHobbyId = null;
+  let editingThoughtId = null;
+  let editingQuoteId = null;
+  let editingIdeaId = null;
+  let editingBookId = null;
+  let bookRating = 0;
+  let skillDraft = null;   // { topics:[], evidence:[] } working copy while modal is open
+  let hobbyDraft = null;   // { log:[] } working copy while modal is open
+
+  async function loadAll(){
+    try{
+      const p = await window.storage.get('profile-config');
+      if(p && p.value) profile = Object.assign(profile, JSON.parse(p.value));
+    }catch(e){}
+    try{
+      const e = await window.storage.get('daily-entries');
+      if(e && e.value) entries = JSON.parse(e.value);
+    }catch(e){}
+    try{
+      const t = await window.storage.get('timeline-events');
+      if(t && t.value) events = JSON.parse(t.value);
+    }catch(e){}
+    try{
+      const s = await window.storage.get('skills-data');
+      if(s && s.value) skills = JSON.parse(s.value);
+    }catch(e){}
+    try{
+      const st = await window.storage.get('studies-data');
+      if(st && st.value) studies = JSON.parse(st.value);
+    }catch(e){}
+    try{
+      const h = await window.storage.get('hobbies-data');
+      if(h && h.value) hobbies = JSON.parse(h.value);
+    }catch(e){}
+    try{
+      const th = await window.storage.get('thoughts-data');
+      if(th && th.value) myThoughts = JSON.parse(th.value);
+    }catch(e){}
+    try{
+      const q = await window.storage.get('quotes-data');
+      if(q && q.value) quotes = JSON.parse(q.value);
+    }catch(e){}
+    try{
+      const id = await window.storage.get('ideas-data');
+      if(id && id.value) ideas = JSON.parse(id.value);
+    }catch(e){}
+    try{
+      const bk = await window.storage.get('books-data');
+      if(bk && bk.value) books = JSON.parse(bk.value);
+    }catch(e){}
+    renderAll();
+  }
+  async function saveProfile(){
+    try{ await window.storage.set('profile-config', JSON.stringify(profile)); }catch(e){}
+  }
+  async function saveEntries(){
+    try{ await window.storage.set('daily-entries', JSON.stringify(entries)); }catch(e){}
+  }
+  async function saveEvents(){
+    try{ await window.storage.set('timeline-events', JSON.stringify(events)); }catch(e){}
+  }
+  async function saveSkills(){
+    try{ await window.storage.set('skills-data', JSON.stringify(skills)); }catch(e){}
+  }
+  async function saveStudies(){
+    try{ await window.storage.set('studies-data', JSON.stringify(studies)); }catch(e){}
+  }
+  async function saveHobbies(){
+    try{ await window.storage.set('hobbies-data', JSON.stringify(hobbies)); }catch(e){}
+  }
+  async function saveThoughts(){
+    try{ await window.storage.set('thoughts-data', JSON.stringify(myThoughts)); }catch(e){}
+  }
+  async function saveQuotes(){
+    try{ await window.storage.set('quotes-data', JSON.stringify(quotes)); }catch(e){}
+  }
+  async function saveIdeas(){
+    try{ await window.storage.set('ideas-data', JSON.stringify(ideas)); }catch(e){}
+  }
+  async function saveBooks(){
+    try{ await window.storage.set('books-data', JSON.stringify(books)); }catch(e){}
+  }
+
+  function renderAll(){
+    document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-US',{month:'long', day:'numeric', year:'numeric'}).toUpperCase();
+    renderDashboard();
+    renderCalendar();
+    renderTimeline();
+    renderSkillsGrid();
+    renderStudiesGrid();
+    renderHobbiesGrid();
+    renderThoughtsList();
+    renderQuotesList();
+    renderIdeasList();
+    renderBooksGrid();
+  }
+
+  /* ---------- dashboard ---------- */
+  function renderDashboard(){
+    const grid = document.getElementById('currentlyGrid');
+    grid.innerHTML = '';
+    const items = [
+      ['Studies', profile.studies],
+      ['Skills', profile.skills],
+      ['Hobbies', profile.hobbies],
+      ['Exploring', profile.exploring]
+    ];
+    items.forEach(([label,val])=>{
+      const div = document.createElement('div');
+      div.className = 'currently-item';
+      div.innerHTML = `<h4>${label}</h4><p>${val || '—'}</p>`;
+      grid.appendChild(div);
+    });
+
+    const fl = document.getElementById('focusList');
+    fl.innerHTML = '';
+    if(profile.focus.length === 0){
+      fl.innerHTML = '<li class="empty-note">Nothing set yet.</li>';
+    } else {
+      profile.focus.forEach(f=>{
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="focus-arrow">&rarr;</span> ${escapeHtml(f)}`;
+        fl.appendChild(li);
+      });
+    }
+
+    const pl = document.getElementById('progressList');
+    pl.innerHTML = '';
+    if(profile.progress.length === 0){
+      pl.innerHTML = '<li class="empty-note">Nothing logged yet — add what you finished, learned, started, or made.</li>';
+    } else {
+      profile.progress.slice().reverse().slice(0,6).forEach(p=>{
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="arrow">&rarr;</span> ${escapeHtml(p)}`;
+        pl.appendChild(li);
+      });
+    }
+
+    const stats = document.getElementById('todayStats');
+    const t = entries[TODAY] || {};
+    stats.innerHTML = '';
+    [['Study', t.study],['Coding', t.coding],['Reading', t.reading],['Exercise', t.exercise]].forEach(([label,val])=>{
+      const div = document.createElement('div');
+      div.className = 'stat';
+      div.innerHTML = `<div class="stat-label">${label}</div><div class="stat-value">${val ? escapeHtml(val) : '—'}</div>`;
+      stats.appendChild(div);
+    });
+  }
+
+  /* ---------- calendar ---------- */
+  function activityLevel(entry){
+    if(!entry) return 0;
+    let score = 0;
+    if(entry.study) score++;
+    if(entry.coding) score++;
+    if(entry.reading) score++;
+    if(entry.exercise) score++;
+    if(entry.notes && entry.notes.trim().length > 0) score++;
+    if(score === 0) return 0;
+    if(score <= 1) return 1;
+    if(score <= 2) return 2;
+    return 3;
+  }
+
+  function renderCalendar(){
+    const y = calCursor.getFullYear(), m = calCursor.getMonth();
+    document.getElementById('calMonthLabel').textContent = MONTH_NAMES[m] + " " + y;
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    DOW.forEach(d=>{
+      const el = document.createElement('div');
+      el.className = 'cal-dow';
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+    const firstDay = new Date(y,m,1).getDay();
+    const daysInMonth = new Date(y,m+1,0).getDate();
+    for(let i=0;i<firstDay;i++){
+      const el = document.createElement('div');
+      el.className = 'cal-day empty';
+      grid.appendChild(el);
+    }
+    for(let d=1; d<=daysInMonth; d++){
+      const dateStr = y+"-"+String(m+1).padStart(2,'0')+"-"+String(d).padStart(2,'0');
+      const entry = entries[dateStr];
+      const level = activityLevel(entry);
+      const el = document.createElement('div');
+      el.className = 'cal-day' + (dateStr === TODAY ? ' is-today' : '');
+      el.dataset.level = level;
+      el.innerHTML = `<div class="dot"></div><span>${d}</span>`;
+      el.addEventListener('click', ()=> openDayModal(dateStr));
+      grid.appendChild(el);
+    }
+  }
+
+  document.getElementById('calPrev').addEventListener('click', ()=>{
+    calCursor.setMonth(calCursor.getMonth()-1);
+    renderCalendar();
+  });
+  document.getElementById('calNext').addEventListener('click', ()=>{
+    calCursor.setMonth(calCursor.getMonth()+1);
+    renderCalendar();
+  });
+
+  /* ---------- timeline ---------- */
+  function renderTimeline(){
+    const wrap = document.getElementById('threadList');
+    wrap.innerHTML = '';
+    if(events.length === 0){
+      wrap.innerHTML = '<p class="empty-note">No moments recorded yet. Add the first one.</p>';
+      return;
+    }
+    const sorted = events.slice().sort((a,b)=> b.date.localeCompare(a.date));
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-14);
+    sorted.forEach(ev=>{
+      const isRecent = new Date(ev.date) >= cutoff;
+      const div = document.createElement('div');
+      div.className = 'thread-entry' + (isRecent ? ' is-recent' : '');
+      const dateLabel = new Date(ev.date+"T00:00:00").toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'});
+      div.innerHTML = `
+        <div class="thread-node"></div>
+        <div class="thread-date">${dateLabel}</div>
+        <div class="thread-title">${escapeHtml(ev.title)}</div>
+        ${ev.desc ? `<div class="thread-desc">${escapeHtml(ev.desc)}</div>` : ''}
+      `;
+      div.addEventListener('click', ()=> openEventModal(ev.id));
+      wrap.appendChild(div);
+    });
+  }
+
+  /* ---------- skills grid ---------- */
+  function renderSkillsGrid(){
+    const grid = document.getElementById('skillsGrid');
+    grid.innerHTML = '';
+    if(skills.length === 0){
+      grid.innerHTML = '<p class="empty-note">No skills tracked yet. Add one to start the learn → practice → evidence → reflect loop.</p>';
+      return;
+    }
+    skills.forEach(sk=>{
+      const div = document.createElement('div');
+      div.className = 'entity-card';
+      const dots = (sk.topics||[]).map(t=>`<span class="status-dot s${t.status}">${escapeHtml(t.text)}</span>`).join('');
+      div.innerHTML = `<h4>${escapeHtml(sk.name)}</h4><div class="card-sub">${sk.focus ? escapeHtml(sk.focus) : ''}</div><div class="status-dots">${dots}</div>`;
+      div.addEventListener('click', ()=> openSkillModal(sk.id));
+      grid.appendChild(div);
+    });
+  }
+
+  function renderSkillDynamicRows(){
+    const topicsWrap = document.getElementById('skTopicsRows');
+    topicsWrap.innerHTML = '';
+    skillDraft.topics.forEach((t, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'dyn-row';
+      row.innerHTML = `
+        <input type="text" value="${escapeAttr(t.text)}" data-idx="${idx}" class="topic-text" placeholder="Topic name">
+        <button type="button" class="status-cycle s${t.status}" data-idx="${idx}">${STATUS_LABELS[t.status]}</button>
+        <button type="button" class="row-remove" data-idx="${idx}" title="remove">&times;</button>
+      `;
+      topicsWrap.appendChild(row);
+    });
+    topicsWrap.querySelectorAll('.topic-text').forEach(inp=>{
+      inp.addEventListener('input', e=>{ skillDraft.topics[+e.target.dataset.idx].text = e.target.value; });
+    });
+    topicsWrap.querySelectorAll('.status-cycle').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const idx = +e.target.dataset.idx;
+        skillDraft.topics[idx].status = (skillDraft.topics[idx].status + 1) % 5;
+        renderSkillDynamicRows();
+      });
+    });
+    topicsWrap.querySelectorAll('.row-remove').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        skillDraft.topics.splice(+e.target.dataset.idx,1);
+        renderSkillDynamicRows();
+      });
+    });
+
+    const evWrap = document.getElementById('skEvidenceRows');
+    evWrap.innerHTML = '';
+    skillDraft.evidence.forEach((ev, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'evidence-row';
+      row.innerHTML = `
+        <div style="display:flex; justify-content:space-between; gap:8px;">
+          <input class="ev-title" type="text" value="${escapeAttr(ev.title)}" data-idx="${idx}" placeholder="Project / evidence title">
+          <button type="button" class="row-remove" data-idx="${idx}">&times;</button>
+        </div>
+        <input class="ev-note" type="text" value="${escapeAttr(ev.note)}" data-idx="${idx}" placeholder="What it shows">
+      `;
+      evWrap.appendChild(row);
+    });
+    evWrap.querySelectorAll('.ev-title').forEach(inp=>{
+      inp.addEventListener('input', e=>{ skillDraft.evidence[+e.target.dataset.idx].title = e.target.value; });
+    });
+    evWrap.querySelectorAll('.ev-note').forEach(inp=>{
+      inp.addEventListener('input', e=>{ skillDraft.evidence[+e.target.dataset.idx].note = e.target.value; });
+    });
+    evWrap.querySelectorAll('.row-remove').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        skillDraft.evidence.splice(+e.target.dataset.idx,1);
+        renderSkillDynamicRows();
+      });
+    });
+  }
+
+  function openSkillModal(id){
+    editingSkillId = id || null;
+    const sk = id ? skills.find(s=>s.id===id) : null;
+    document.getElementById('skillModalTitle').textContent = sk ? sk.name : 'New skill';
+    document.getElementById('sk-name').value = sk ? sk.name : '';
+    document.getElementById('sk-focus').value = sk ? sk.focus : '';
+    document.getElementById('sk-resources').value = sk ? (sk.resources||[]).join('\n') : '';
+    document.getElementById('sk-reflection').value = sk ? sk.reflection : '';
+    skillDraft = {
+      topics: sk ? JSON.parse(JSON.stringify(sk.topics||[])) : [],
+      evidence: sk ? JSON.parse(JSON.stringify(sk.evidence||[])) : []
+    };
+    renderSkillDynamicRows();
+    document.getElementById('deleteSkillBtn').style.display = sk ? 'inline-block' : 'none';
+    document.getElementById('skillOverlay').classList.add('active');
+  }
+  function closeSkillModal(){ document.getElementById('skillOverlay').classList.remove('active'); editingSkillId = null; skillDraft = null; }
+
+  document.getElementById('addSkillBtn').addEventListener('click', ()=> openSkillModal(null));
+  document.getElementById('cancelSkillBtn').addEventListener('click', closeSkillModal);
+  document.getElementById('skAddTopic').addEventListener('click', ()=>{
+    skillDraft.topics.push({text:'', status:0});
+    renderSkillDynamicRows();
+  });
+  document.getElementById('skAddEvidence').addEventListener('click', ()=>{
+    skillDraft.evidence.push({title:'', note:''});
+    renderSkillDynamicRows();
+  });
+  document.getElementById('saveSkillBtn').addEventListener('click', async ()=>{
+    const name = document.getElementById('sk-name').value.trim();
+    if(!name) return;
+    const data = {
+      name,
+      focus: document.getElementById('sk-focus').value.trim(),
+      topics: skillDraft.topics.filter(t=>t.text.trim()!==''),
+      resources: document.getElementById('sk-resources').value.split('\n').map(s=>s.trim()).filter(Boolean),
+      evidence: skillDraft.evidence.filter(e=>e.title.trim()!==''),
+      reflection: document.getElementById('sk-reflection').value.trim()
+    };
+    if(editingSkillId){
+      Object.assign(skills.find(s=>s.id===editingSkillId), data);
+    } else {
+      skills.push(Object.assign({id:'sk_'+Date.now()}, data));
+    }
+    await saveSkills();
+    closeSkillModal();
+    renderSkillsGrid();
+  });
+  document.getElementById('deleteSkillBtn').addEventListener('click', async ()=>{
+    if(!editingSkillId) return;
+    skills = skills.filter(s=>s.id!==editingSkillId);
+    await saveSkills();
+    closeSkillModal();
+    renderSkillsGrid();
+  });
+
+  /* ---------- studies grid ---------- */
+  function renderStudiesGrid(){
+    const grid = document.getElementById('studiesGrid');
+    grid.innerHTML = '';
+    if(studies.length === 0){
+      grid.innerHTML = '<p class="empty-note">No subjects added yet.</p>';
+      return;
+    }
+    studies.forEach(st=>{
+      const div = document.createElement('div');
+      div.className = 'entity-card';
+      div.innerHTML = `<h4>${escapeHtml(st.subject)}</h4><div class="card-sub">${st.term ? escapeHtml(st.term) : ''}</div><div class="status-dots"><span class="status-dot">${(st.completed||[]).length} completed</span><span class="status-dot s2">${(st.inProgress||[]).length} in progress</span></div>`;
+      div.addEventListener('click', ()=> openStudyModal(st.id));
+      grid.appendChild(div);
+    });
+  }
+  function openStudyModal(id){
+    editingStudyId = id || null;
+    const st = id ? studies.find(s=>s.id===id) : null;
+    document.getElementById('studyModalTitle').textContent = st ? st.subject : 'New subject';
+    document.getElementById('st-subject').value = st ? st.subject : '';
+    document.getElementById('st-term').value = st ? st.term : '';
+    document.getElementById('st-learning').value = st ? st.learning : '';
+    document.getElementById('st-completed').value = st ? (st.completed||[]).join('\n') : '';
+    document.getElementById('st-inprogress').value = st ? (st.inProgress||[]).join('\n') : '';
+    document.getElementById('st-notes').value = st ? st.notes : '';
+    document.getElementById('deleteStudyBtn').style.display = st ? 'inline-block' : 'none';
+    document.getElementById('studyOverlay').classList.add('active');
+  }
+  function closeStudyModal(){ document.getElementById('studyOverlay').classList.remove('active'); editingStudyId = null; }
+  document.getElementById('addStudyBtn').addEventListener('click', ()=> openStudyModal(null));
+  document.getElementById('cancelStudyBtn').addEventListener('click', closeStudyModal);
+  document.getElementById('saveStudyBtn').addEventListener('click', async ()=>{
+    const subject = document.getElementById('st-subject').value.trim();
+    if(!subject) return;
+    const data = {
+      subject,
+      term: document.getElementById('st-term').value.trim(),
+      learning: document.getElementById('st-learning').value.trim(),
+      completed: document.getElementById('st-completed').value.split('\n').map(s=>s.trim()).filter(Boolean),
+      inProgress: document.getElementById('st-inprogress').value.split('\n').map(s=>s.trim()).filter(Boolean),
+      notes: document.getElementById('st-notes').value.trim()
+    };
+    if(editingStudyId){
+      Object.assign(studies.find(s=>s.id===editingStudyId), data);
+    } else {
+      studies.push(Object.assign({id:'st_'+Date.now()}, data));
+    }
+    await saveStudies();
+    closeStudyModal();
+    renderStudiesGrid();
+  });
+  document.getElementById('deleteStudyBtn').addEventListener('click', async ()=>{
+    if(!editingStudyId) return;
+    studies = studies.filter(s=>s.id!==editingStudyId);
+    await saveStudies();
+    closeStudyModal();
+    renderStudiesGrid();
+  });
+
+  /* ---------- hobbies grid ---------- */
+  function renderHobbiesGrid(){
+    const grid = document.getElementById('hobbiesGrid');
+    grid.innerHTML = '';
+    if(hobbies.length === 0){
+      grid.innerHTML = '<p class="empty-note">No hobbies added yet.</p>';
+      return;
+    }
+    hobbies.forEach(hb=>{
+      const div = document.createElement('div');
+      div.className = 'entity-card';
+      const sub = hb.started ? `since ${hb.started}` : '';
+      div.innerHTML = `<h4>${escapeHtml(hb.name)}</h4><div class="card-sub">${escapeHtml(sub)}</div><div class="status-dots"><span class="status-dot s2">${(hb.log||[]).length} logged</span></div>`;
+      div.addEventListener('click', ()=> openHobbyModal(hb.id));
+      grid.appendChild(div);
+    });
+  }
+  function renderHobbyLogRows(){
+    const wrap = document.getElementById('hbLogRows');
+    wrap.innerHTML = '';
+    if(hobbyDraft.log.length === 0){
+      wrap.innerHTML = '<p class="empty-note">Nothing logged yet.</p>';
+      return;
+    }
+    hobbyDraft.log.slice().reverse().forEach((entry)=>{
+      const realIdx = hobbyDraft.log.indexOf(entry);
+      const row = document.createElement('div');
+      row.className = 'log-row';
+      const dateLabel = entry.date ? new Date(entry.date+"T00:00:00").toLocaleDateString('en-US',{month:'short', day:'numeric'}) : '';
+      row.innerHTML = `<span class="log-date">${dateLabel}</span><span>${escapeHtml(entry.text)}</span><button type="button" class="row-remove" data-idx="${realIdx}" style="margin-left:auto;">&times;</button>`;
+      wrap.appendChild(row);
+    });
+    wrap.querySelectorAll('.row-remove').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        hobbyDraft.log.splice(+e.target.dataset.idx,1);
+        renderHobbyLogRows();
+      });
+    });
+  }
+  function openHobbyModal(id){
+    editingHobbyId = id || null;
+    const hb = id ? hobbies.find(h=>h.id===id) : null;
+    document.getElementById('hobbyModalTitle').textContent = hb ? hb.name : 'New hobby';
+    document.getElementById('hb-name').value = hb ? hb.name : '';
+    document.getElementById('hb-started').value = hb ? hb.started : '';
+    document.getElementById('hb-focus').value = hb ? (hb.focus||[]).join('\n') : '';
+    document.getElementById('hb-goals').value = hb ? (hb.goals||[]).join('\n') : '';
+    document.getElementById('hb-notes').value = hb ? hb.notes : '';
+    document.getElementById('hb-log-date').value = TODAY;
+    document.getElementById('hb-log-text').value = '';
+    hobbyDraft = { log: hb ? JSON.parse(JSON.stringify(hb.log||[])) : [] };
+    renderHobbyLogRows();
+    document.getElementById('deleteHobbyBtn').style.display = hb ? 'inline-block' : 'none';
+    document.getElementById('hobbyOverlay').classList.add('active');
+  }
+  function closeHobbyModal(){ document.getElementById('hobbyOverlay').classList.remove('active'); editingHobbyId = null; hobbyDraft = null; }
+  document.getElementById('addHobbyBtn').addEventListener('click', ()=> openHobbyModal(null));
+  document.getElementById('cancelHobbyBtn').addEventListener('click', closeHobbyModal);
+  document.getElementById('hbAddLog').addEventListener('click', ()=>{
+    const date = document.getElementById('hb-log-date').value || TODAY;
+    const text = document.getElementById('hb-log-text').value.trim();
+    if(!text) return;
+    hobbyDraft.log.push({date, text});
+    document.getElementById('hb-log-text').value = '';
+    renderHobbyLogRows();
+  });
+  document.getElementById('saveHobbyBtn').addEventListener('click', async ()=>{
+    const name = document.getElementById('hb-name').value.trim();
+    if(!name) return;
+    const data = {
+      name,
+      started: document.getElementById('hb-started').value.trim(),
+      focus: document.getElementById('hb-focus').value.split('\n').map(s=>s.trim()).filter(Boolean),
+      goals: document.getElementById('hb-goals').value.split('\n').map(s=>s.trim()).filter(Boolean),
+      log: hobbyDraft.log,
+      notes: document.getElementById('hb-notes').value.trim()
+    };
+    if(editingHobbyId){
+      Object.assign(hobbies.find(h=>h.id===editingHobbyId), data);
+    } else {
+      hobbies.push(Object.assign({id:'hb_'+Date.now()}, data));
+    }
+    await saveHobbies();
+    closeHobbyModal();
+    renderHobbiesGrid();
+  });
+  document.getElementById('deleteHobbyBtn').addEventListener('click', async ()=>{
+    if(!editingHobbyId) return;
+    hobbies = hobbies.filter(h=>h.id!==editingHobbyId);
+    await saveHobbies();
+    closeHobbyModal();
+    renderHobbiesGrid();
+  });
+
+  /* ---------- thoughts ---------- */
+  function renderThoughtsList(){
+    const wrap = document.getElementById('thoughtsList');
+    wrap.innerHTML = '';
+    if(myThoughts.length === 0){
+      wrap.innerHTML = '<p class="empty-note">Nothing written yet.</p>';
+      return;
+    }
+    myThoughts.slice().sort((a,b)=> b.date.localeCompare(a.date)).forEach(t=>{
+      const div = document.createElement('div');
+      div.className = 'thought-row';
+      const dateLabel = new Date(t.date+"T00:00:00").toLocaleDateString('en-US',{month:'long', day:'numeric', year:'numeric'});
+      div.innerHTML = `<div class="thought-date">${dateLabel}</div><p>${escapeHtml(t.text)}</p>`;
+      div.addEventListener('click', ()=> openThoughtModal(t.id));
+      wrap.appendChild(div);
+    });
+  }
+  function openThoughtModal(id){
+    editingThoughtId = id || null;
+    const t = id ? myThoughts.find(x=>x.id===id) : null;
+    document.getElementById('th-date').value = t ? t.date : TODAY;
+    document.getElementById('th-text').value = t ? t.text : '';
+    document.getElementById('deleteThoughtBtn').style.display = t ? 'inline-block' : 'none';
+    document.getElementById('thoughtOverlay').classList.add('active');
+  }
+  function closeThoughtModal(){ document.getElementById('thoughtOverlay').classList.remove('active'); editingThoughtId = null; }
+  document.getElementById('addThoughtBtn').addEventListener('click', ()=> openThoughtModal(null));
+  document.getElementById('cancelThoughtBtn').addEventListener('click', closeThoughtModal);
+  document.getElementById('saveThoughtBtn').addEventListener('click', async ()=>{
+    const text = document.getElementById('th-text').value.trim();
+    if(!text) return;
+    const data = { date: document.getElementById('th-date').value || TODAY, text };
+    if(editingThoughtId){
+      Object.assign(myThoughts.find(x=>x.id===editingThoughtId), data);
+    } else {
+      myThoughts.push(Object.assign({id:'th_'+Date.now()}, data));
+    }
+    await saveThoughts();
+    closeThoughtModal();
+    renderThoughtsList();
+  });
+  document.getElementById('deleteThoughtBtn').addEventListener('click', async ()=>{
+    if(!editingThoughtId) return;
+    myThoughts = myThoughts.filter(x=>x.id!==editingThoughtId);
+    await saveThoughts();
+    closeThoughtModal();
+    renderThoughtsList();
+  });
+
+  /* ---------- quotes ---------- */
+  function renderQuotesList(){
+    const wrap = document.getElementById('quotesList');
+    wrap.innerHTML = '';
+    if(quotes.length === 0){
+      wrap.innerHTML = '<p class="empty-note">No quotes saved yet.</p>';
+      return;
+    }
+    quotes.forEach(q=>{
+      const div = document.createElement('div');
+      div.className = 'quote-card';
+      const tags = (q.tags||[]).map(t=>`<span class="tag-pill">${escapeHtml(t)}</span>`).join('');
+      div.innerHTML = `
+        <blockquote>${escapeHtml(q.text)}</blockquote>
+        ${q.author ? `<div class="quote-author">— ${escapeHtml(q.author)}</div>` : ''}
+        ${q.why ? `<div class="quote-why">${escapeHtml(q.why)}</div>` : ''}
+        <div>${tags}</div>
+      `;
+      div.addEventListener('click', ()=> openQuoteModal(q.id));
+      wrap.appendChild(div);
+    });
+  }
+  function openQuoteModal(id){
+    editingQuoteId = id || null;
+    const q = id ? quotes.find(x=>x.id===id) : null;
+    document.getElementById('qt-text').value = q ? q.text : '';
+    document.getElementById('qt-author').value = q ? q.author : '';
+    document.getElementById('qt-why').value = q ? q.why : '';
+    document.getElementById('qt-tags').value = q ? (q.tags||[]).join(', ') : '';
+    document.getElementById('deleteQuoteBtn').style.display = q ? 'inline-block' : 'none';
+    document.getElementById('quoteOverlay').classList.add('active');
+  }
+  function closeQuoteModal(){ document.getElementById('quoteOverlay').classList.remove('active'); editingQuoteId = null; }
+  document.getElementById('addQuoteBtn').addEventListener('click', ()=> openQuoteModal(null));
+  document.getElementById('cancelQuoteBtn').addEventListener('click', closeQuoteModal);
+  document.getElementById('saveQuoteBtn').addEventListener('click', async ()=>{
+    const text = document.getElementById('qt-text').value.trim();
+    if(!text) return;
+    const data = {
+      text,
+      author: document.getElementById('qt-author').value.trim(),
+      why: document.getElementById('qt-why').value.trim(),
+      tags: document.getElementById('qt-tags').value.split(',').map(s=>s.trim()).filter(Boolean)
+    };
+    if(editingQuoteId){
+      Object.assign(quotes.find(x=>x.id===editingQuoteId), data);
+    } else {
+      quotes.push(Object.assign({id:'qt_'+Date.now()}, data));
+    }
+    await saveQuotes();
+    closeQuoteModal();
+    renderQuotesList();
+  });
+  document.getElementById('deleteQuoteBtn').addEventListener('click', async ()=>{
+    if(!editingQuoteId) return;
+    quotes = quotes.filter(x=>x.id!==editingQuoteId);
+    await saveQuotes();
+    closeQuoteModal();
+    renderQuotesList();
+  });
+
+  /* ---------- ideas ---------- */
+  function renderIdeasList(){
+    const wrap = document.getElementById('ideasList');
+    wrap.innerHTML = '';
+    if(ideas.length === 0){
+      wrap.innerHTML = '<p class="empty-note">Nothing here yet — you don\'t need an answer to record a question.</p>';
+      return;
+    }
+    ideas.forEach(i=>{
+      const div = document.createElement('div');
+      div.className = 'idea-card';
+      const tags = (i.tags||[]).map(t=>`<span class="tag-pill">${escapeHtml(t)}</span>`).join('');
+      div.innerHTML = `
+        <p>${escapeHtml(i.text)}</p>
+        <span class="idea-status">${escapeHtml(i.status || 'Exploring')}</span>
+        ${tags}
+      `;
+      div.addEventListener('click', ()=> openIdeaModal(i.id));
+      wrap.appendChild(div);
+    });
+  }
+  function openIdeaModal(id){
+    editingIdeaId = id || null;
+    const i = id ? ideas.find(x=>x.id===id) : null;
+    document.getElementById('id-text').value = i ? i.text : '';
+    document.getElementById('id-status').value = i ? i.status : 'Exploring';
+    document.getElementById('id-tags').value = i ? (i.tags||[]).join(', ') : '';
+    document.getElementById('deleteIdeaBtn').style.display = i ? 'inline-block' : 'none';
+    document.getElementById('ideaOverlay').classList.add('active');
+  }
+  function closeIdeaModal(){ document.getElementById('ideaOverlay').classList.remove('active'); editingIdeaId = null; }
+  document.getElementById('addIdeaBtn').addEventListener('click', ()=> openIdeaModal(null));
+  document.getElementById('cancelIdeaBtn').addEventListener('click', closeIdeaModal);
+  document.getElementById('saveIdeaBtn').addEventListener('click', async ()=>{
+    const text = document.getElementById('id-text').value.trim();
+    if(!text) return;
+    const data = {
+      text,
+      status: document.getElementById('id-status').value.trim() || 'Exploring',
+      tags: document.getElementById('id-tags').value.split(',').map(s=>s.trim()).filter(Boolean)
+    };
+    if(editingIdeaId){
+      Object.assign(ideas.find(x=>x.id===editingIdeaId), data);
+    } else {
+      ideas.push(Object.assign({id:'id_'+Date.now()}, data));
+    }
+    await saveIdeas();
+    closeIdeaModal();
+    renderIdeasList();
+  });
+  document.getElementById('deleteIdeaBtn').addEventListener('click', async ()=>{
+    if(!editingIdeaId) return;
+    ideas = ideas.filter(x=>x.id!==editingIdeaId);
+    await saveIdeas();
+    closeIdeaModal();
+    renderIdeasList();
+  });
+
+  /* ---------- books ---------- */
+  function renderBooksGrid(){
+    const grid = document.getElementById('booksGrid');
+    grid.innerHTML = '';
+    if(books.length === 0){
+      grid.innerHTML = '<p class="empty-note">No books logged yet.</p>';
+      return;
+    }
+    books.forEach(bk=>{
+      const div = document.createElement('div');
+      div.className = 'book-card';
+      const stars = '&#9733;'.repeat(bk.rating||0) + '&#9734;'.repeat(5-(bk.rating||0));
+      const sub = [bk.started, bk.finished].filter(Boolean).join(' – ');
+      div.innerHTML = `<h4>${escapeHtml(bk.title)}</h4><div class="card-sub">${escapeHtml(sub)}</div><div class="book-stars">${stars}</div>`;
+      div.addEventListener('click', ()=> openBookModal(bk.id));
+      grid.appendChild(div);
+    });
+  }
+  function renderStarPicker(){
+    document.querySelectorAll('#bk-star-picker span').forEach(s=>{
+      s.classList.toggle('filled', +s.dataset.val <= bookRating);
+    });
+  }
+  document.querySelectorAll('#bk-star-picker span').forEach(s=>{
+    s.addEventListener('click', ()=>{
+      bookRating = (bookRating === +s.dataset.val) ? 0 : +s.dataset.val;
+      renderStarPicker();
+    });
+  });
+  function openBookModal(id){
+    editingBookId = id || null;
+    const bk = id ? books.find(x=>x.id===id) : null;
+    document.getElementById('bookModalTitle').textContent = bk ? bk.title : 'New book';
+    document.getElementById('bk-title').value = bk ? bk.title : '';
+    document.getElementById('bk-started').value = bk ? bk.started : '';
+    document.getElementById('bk-finished').value = bk ? bk.finished : '';
+    document.getElementById('bk-learned').value = bk ? bk.learned : '';
+    document.getElementById('bk-stayed').value = bk ? bk.stayed : '';
+    document.getElementById('bk-changed').value = bk ? bk.changed : '';
+    document.getElementById('bk-quotes').value = bk ? bk.quotesText : '';
+    document.getElementById('bk-tags').value = bk ? (bk.tags||[]).join(', ') : '';
+    bookRating = bk ? (bk.rating||0) : 0;
+    renderStarPicker();
+    document.getElementById('deleteBookBtn').style.display = bk ? 'inline-block' : 'none';
+    document.getElementById('bookOverlay').classList.add('active');
+  }
+  function closeBookModal(){ document.getElementById('bookOverlay').classList.remove('active'); editingBookId = null; }
+  document.getElementById('addBookBtn').addEventListener('click', ()=> openBookModal(null));
+  document.getElementById('cancelBookBtn').addEventListener('click', closeBookModal);
+  document.getElementById('saveBookBtn').addEventListener('click', async ()=>{
+    const title = document.getElementById('bk-title').value.trim();
+    if(!title) return;
+    const data = {
+      title,
+      started: document.getElementById('bk-started').value.trim(),
+      finished: document.getElementById('bk-finished').value.trim(),
+      rating: bookRating,
+      learned: document.getElementById('bk-learned').value.trim(),
+      stayed: document.getElementById('bk-stayed').value.trim(),
+      changed: document.getElementById('bk-changed').value.trim(),
+      quotesText: document.getElementById('bk-quotes').value.trim(),
+      tags: document.getElementById('bk-tags').value.split(',').map(s=>s.trim()).filter(Boolean)
+    };
+    if(editingBookId){
+      Object.assign(books.find(x=>x.id===editingBookId), data);
+    } else {
+      books.push(Object.assign({id:'bk_'+Date.now()}, data));
+    }
+    await saveBooks();
+    closeBookModal();
+    renderBooksGrid();
+  });
+  document.getElementById('deleteBookBtn').addEventListener('click', async ()=>{
+    if(!editingBookId) return;
+    books = books.filter(x=>x.id!==editingBookId);
+    await saveBooks();
+    closeBookModal();
+    renderBooksGrid();
+  });
+
+  /* ---------- tabs ---------- */
+  document.querySelectorAll('nav.tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('view-'+btn.dataset.view).classList.add('active');
+    });
+  });
+
+  /* ---------- day modal ---------- */
+  function openDayModal(dateStr){
+    editingDate = dateStr;
+    const e = entries[dateStr] || {};
+    document.getElementById('dayModalTitle').textContent =
+      dateStr === TODAY ? 'Log today' : new Date(dateStr+"T00:00:00").toLocaleDateString('en-US',{month:'long', day:'numeric', year:'numeric'});
+    document.getElementById('f-study').value = e.study || '';
+    document.getElementById('f-coding').value = e.coding || '';
+    document.getElementById('f-reading').value = e.reading || '';
+    document.getElementById('f-exercise').value = e.exercise || '';
+    document.getElementById('f-notes').value = e.notes || '';
+    document.getElementById('deleteDayBtn').style.display = entries[dateStr] ? 'inline-block' : 'none';
+    document.getElementById('dayOverlay').classList.add('active');
+  }
+  function closeDayModal(){ document.getElementById('dayOverlay').classList.remove('active'); editingDate = null; }
+
+  document.getElementById('logTodayBtn').addEventListener('click', ()=> openDayModal(TODAY));
+  document.getElementById('cancelDayBtn').addEventListener('click', closeDayModal);
+  document.getElementById('saveDayBtn').addEventListener('click', async ()=>{
+    if(!editingDate) return;
+    entries[editingDate] = {
+      study: document.getElementById('f-study').value.trim(),
+      coding: document.getElementById('f-coding').value.trim(),
+      reading: document.getElementById('f-reading').value.trim(),
+      exercise: document.getElementById('f-exercise').value.trim(),
+      notes: document.getElementById('f-notes').value.trim()
+    };
+    await saveEntries();
+    closeDayModal();
+    renderDashboard(); renderCalendar();
+  });
+  document.getElementById('deleteDayBtn').addEventListener('click', async ()=>{
+    if(!editingDate) return;
+    delete entries[editingDate];
+    await saveEntries();
+    closeDayModal();
+    renderDashboard(); renderCalendar();
+  });
+
+  /* ---------- event modal ---------- */
+  function openEventModal(id){
+    editingEventId = id || null;
+    const ev = id ? events.find(e=>e.id===id) : null;
+    document.getElementById('ev-date').value = ev ? ev.date : TODAY;
+    document.getElementById('ev-title').value = ev ? ev.title : '';
+    document.getElementById('ev-desc').value = ev ? ev.desc : '';
+    document.getElementById('deleteEventBtn').style.display = ev ? 'inline-block' : 'none';
+    document.getElementById('eventOverlay').classList.add('active');
+  }
+  function closeEventModal(){ document.getElementById('eventOverlay').classList.remove('active'); editingEventId = null; }
+
+  document.getElementById('addEventBtn').addEventListener('click', ()=> openEventModal(null));
+  document.getElementById('cancelEventBtn').addEventListener('click', closeEventModal);
+  document.getElementById('saveEventBtn').addEventListener('click', async ()=>{
+    const date = document.getElementById('ev-date').value || TODAY;
+    const title = document.getElementById('ev-title').value.trim();
+    const desc = document.getElementById('ev-desc').value.trim();
+    if(!title) return;
+    if(editingEventId){
+      const ev = events.find(e=>e.id===editingEventId);
+      ev.date = date; ev.title = title; ev.desc = desc;
+    } else {
+      events.push({ id: 'ev_'+Date.now(), date, title, desc });
+    }
+    await saveEvents();
+    closeEventModal();
+    renderTimeline();
+  });
+  document.getElementById('deleteEventBtn').addEventListener('click', async ()=>{
+    if(!editingEventId) return;
+    events = events.filter(e=>e.id !== editingEventId);
+    await saveEvents();
+    closeEventModal();
+    renderTimeline();
+  });
+
+  /* ---------- currently modal ---------- */
+  document.getElementById('editCurrentlyBtn').addEventListener('click', ()=>{
+    document.getElementById('c-studies').value = profile.studies;
+    document.getElementById('c-skills').value = profile.skills;
+    document.getElementById('c-hobbies').value = profile.hobbies;
+    document.getElementById('c-exploring').value = profile.exploring;
+    document.getElementById('currentlyOverlay').classList.add('active');
+  });
+  document.getElementById('cancelCurrentlyBtn').addEventListener('click', ()=>{
+    document.getElementById('currentlyOverlay').classList.remove('active');
+  });
+  document.getElementById('saveCurrentlyBtn').addEventListener('click', async ()=>{
+    profile.studies = document.getElementById('c-studies').value.trim();
+    profile.skills = document.getElementById('c-skills').value.trim();
+    profile.hobbies = document.getElementById('c-hobbies').value.trim();
+    profile.exploring = document.getElementById('c-exploring').value.trim();
+    await saveProfile();
+    document.getElementById('currentlyOverlay').classList.remove('active');
+    renderDashboard();
+  });
+
+  /* ---------- focus modal ---------- */
+  document.getElementById('editFocusBtn').addEventListener('click', ()=>{
+    document.getElementById('f-focus-list').value = profile.focus.join('\n');
+    document.getElementById('focusOverlay').classList.add('active');
+  });
+  document.getElementById('cancelFocusBtn').addEventListener('click', ()=>{
+    document.getElementById('focusOverlay').classList.remove('active');
+  });
+  document.getElementById('saveFocusBtn').addEventListener('click', async ()=>{
+    profile.focus = document.getElementById('f-focus-list').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    await saveProfile();
+    document.getElementById('focusOverlay').classList.remove('active');
+    renderDashboard();
+  });
+
+  /* ---------- progress modal ---------- */
+  document.getElementById('addProgressBtn').addEventListener('click', ()=>{
+    document.getElementById('p-text').value = '';
+    document.getElementById('progressOverlay').classList.add('active');
+  });
+  document.getElementById('cancelProgressBtn').addEventListener('click', ()=>{
+    document.getElementById('progressOverlay').classList.remove('active');
+  });
+  document.getElementById('saveProgressBtn').addEventListener('click', async ()=>{
+    const val = document.getElementById('p-text').value.trim();
+    if(val){
+      profile.progress.push(val);
+      await saveProfile();
+      renderDashboard();
+    }
+    document.getElementById('progressOverlay').classList.remove('active');
+  });
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+  function escapeAttr(str){
+    return (str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  }
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
